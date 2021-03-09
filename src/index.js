@@ -48,10 +48,10 @@ async function twitch() {
   if (!videoData)
     return `**${game}** - Unable to get video data - ${streamTimestamp}`
   if (!videoData.videos.length)
-    return `**${game}** - No video data - ${streamTimestamp}`
+    return `**${game}** - No videos found - ${streamTimestamp}`
   const video = videoData.videos[0]
   if (video.status !== 'recording')
-    return `**${game}** - No LIVE video data - ${streamTimestamp}`
+    return `**${game}** - No LIVE videos found - ${streamTimestamp}`
   const videoDuration = moment.duration(now - moment(video.created_at))
   const videoTimestamp = `${videoDuration.hours()}h${videoDuration.minutes()}m${videoDuration.seconds()}s`
   return `**${game}** - <${video.url}?t=${videoTimestamp}>`
@@ -59,7 +59,7 @@ async function twitch() {
 
 let lastRun
 
-exports.handler = async (event) => {
+async function handler(event) {
   if (!process.env.CLIENT_ID) throw new Error('Missing CLIENT_ID')
   if (!process.env.ACCESS_TOKEN) throw new Error('Missing ACCESS_TOKEN')
   if (!process.env.DISCORD_WEBHOOK) throw new Error('Missing DISCORD_WEBHOOK')
@@ -79,7 +79,7 @@ exports.handler = async (event) => {
   if (event.queryStringParameters.token !== process.env.TOKEN)
     return {
       statusCode: 401,
-      message: 'Unauthorized',
+      body: 'Unauthorized',
     }
 
   if (lastRun) {
@@ -95,15 +95,17 @@ exports.handler = async (event) => {
 
   const content = await twitch()
   if (!content) return
-  if (!event.isTest) {
-    await axios.post(process.env.DISCORD_WEBHOOK, {
-      content,
-    })
-  } else {
-    console.log(content)
-  }
+  await axios.post(process.env.DISCORD_WEBHOOK, {
+    content,
+  })
+
   return {
     statusCode: 200,
     body: content,
   }
+}
+
+module.exports = {
+  handler,
+  twitch,
 }
