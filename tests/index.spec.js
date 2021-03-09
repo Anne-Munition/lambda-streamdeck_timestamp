@@ -130,7 +130,7 @@ describe('lambda-timestamp', () => {
       nock('https://api.twitch.tv')
         .get('/helix/streams')
         .query(true)
-        .reply(200, stubs.replayStream)
+        .reply(200, stubs.rerunStream)
       const actual = await twitch()
       expect(actual).toBe('The stream is not LIVE')
     })
