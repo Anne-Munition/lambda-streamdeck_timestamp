@@ -10,6 +10,12 @@ module.exports = function (grunt) {
         options: { cwd: 'build' },
         exec: 'yarn install --prod',
       },
+      prettier: {
+        exec: 'yarn prettier',
+      },
+      lint: {
+        exec: 'yarn lint',
+      },
       test: {
         exec: 'yarn test',
       },
@@ -54,6 +60,8 @@ module.exports = function (grunt) {
   });
 
   grunt.registerTask('default', [
+    'run:prettier',
+    'run:lint',
     'run:test',
     'remove build folder',
     'create build folder',

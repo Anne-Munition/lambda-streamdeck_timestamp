@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 
-const { handler, twitch } = require('../src');
+const { handler, twitch, getKeys } = require('../src');
 const nock = require('nock');
 const MockDate = require('mockdate');
 const stubs = require('./stubs');
@@ -11,26 +11,36 @@ const duration = require('dayjs/plugin/duration');
 
 dayjs.extend(duration);
 
+nock('https://test.execute-api.us-east-1.amazonaws.com', {
+  reqheaders: {
+    'x-api-key': 'awsapikey',
+  },
+})
+  .get('/')
+  .reply(200, {
+    client_id: 'aws_client_id',
+    access_token: 'aws_access_token',
+  })
+  .persist(true);
+
 describe('lambda-timestamp', () => {
-  beforeEach(() => {
-    process.env.CLIENT_ID = 'clientId';
-    process.env.ACCESS_TOKEN = 'accessToken';
+  beforeEach(async () => {
     process.env.DISCORD_WEBHOOK = 'http://discordWebhook.com';
     process.env.CHANNEL_ID = 'channelID';
     process.env.TOKEN = 'token';
+    process.env.AWS_URL = 'https://test.execute-api.us-east-1.amazonaws.com';
+    process.env.AWS_API_KEY = 'awsapikey';
+    await getKeys();
+  });
+
+  describe('getKeys', () => {
+    it('sets the env with keys from aws', async () => {
+      expect(process.env.CLIENT_ID).toBe('aws_client_id');
+      expect(process.env.ACCESS_TOKEN).toBe('aws_access_token');
+    });
   });
 
   describe('environment', () => {
-    test('no client id', async () => {
-      delete process.env.CLIENT_ID;
-      await expect(handler).rejects.toThrowError('Missing CLIENT_ID');
-    });
-
-    test('no access token', async () => {
-      delete process.env.ACCESS_TOKEN;
-      await expect(handler).rejects.toThrowError('Missing ACCESS_TOKEN');
-    });
-
     test('no discord webhook', async () => {
       delete process.env.DISCORD_WEBHOOK;
       await expect(handler).rejects.toThrowError('Missing DISCORD_WEBHOOK');
@@ -183,33 +193,14 @@ describe('lambda-timestamp', () => {
       expect(actual).toBe('**Escape From Tarkov** - No videos found - 0h10m0s');
     });
 
-    /*test('no videos returned with type recording', async () => {
-      MockDate.set(
-        dayjs(stubs.liveStream.data[0].started_at).valueOf() + 1000 * 60 * 10,
-      );
-      nock('https://api.twitch.tv')
-        .get('/helix/streams')
-        .query(true)
-        .reply(200, stubs.liveStream);
-      nock('https://api.twitch.tv')
-        .get('/helix/videos')
-        .query(true)
-        .reply(200, stubs.video);
-
-      const actual = await twitch();
-      expect(actual).toBe(
-        '**Escape From Tarkov** - No LIVE videos found - 0h10m0s',
-      );
-    });*/
-
     test('good results with full headers and query checks', async () => {
       MockDate.set(
         dayjs(stubs.video.data[0].created_at).valueOf() + 1000 * 60 * 15,
       );
       nock('https://api.twitch.tv', {
         reqheaders: {
-          'Client-ID': 'clientId',
-          Authorization: 'Bearer accessToken',
+          'Client-ID': 'aws_client_id',
+          Authorization: 'Bearer aws_access_token',
         },
       })
         .get('/helix/streams')
@@ -217,8 +208,8 @@ describe('lambda-timestamp', () => {
         .reply(200, stubs.liveStream);
       nock('https://api.twitch.tv', {
         reqheaders: {
-          'Client-ID': 'clientId',
-          Authorization: 'Bearer accessToken',
+          'Client-ID': 'aws_client_id',
+          Authorization: 'Bearer aws_access_token',
         },
       })
         .get('/helix/videos')

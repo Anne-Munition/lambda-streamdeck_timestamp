@@ -51,8 +51,7 @@ async function twitch() {
 let lastRun;
 
 async function handler(event) {
-  if (!process.env.CLIENT_ID) throw new Error('Missing CLIENT_ID');
-  if (!process.env.ACCESS_TOKEN) throw new Error('Missing ACCESS_TOKEN');
+  await getKeys();
   if (!process.env.DISCORD_WEBHOOK) throw new Error('Missing DISCORD_WEBHOOK');
   if (!process.env.CHANNEL_ID) throw new Error('Missing CHANNEL_ID');
   if (!process.env.TOKEN) throw new Error('Missing TOKEN');
@@ -96,7 +95,20 @@ async function handler(event) {
   };
 }
 
+async function getKeys() {
+  const keys = await axios
+    .get(process.env.AWS_URL, {
+      headers: {
+        'x-api-key': process.env.AWS_API_KEY,
+      },
+    })
+    .then(({ data }) => data);
+  process.env.CLIENT_ID = keys.client_id;
+  process.env.ACCESS_TOKEN = keys.access_token;
+}
+
 module.exports = {
   handler,
   twitch,
+  getKeys,
 };
