@@ -1,7 +1,7 @@
-const fs = require('fs')
-const path = require('path')
+const fs = require('fs');
+const path = require('path');
 
-const buildDir = path.join(process.cwd(), 'build')
+const buildDir = path.join(process.cwd(), 'build');
 
 module.exports = function (grunt) {
   grunt.initConfig({
@@ -36,22 +36,22 @@ module.exports = function (grunt) {
         ],
       },
     },
-  })
+  });
 
-  grunt.loadNpmTasks('grunt-run')
-  grunt.loadNpmTasks('grunt-contrib-compress')
+  grunt.loadNpmTasks('grunt-run');
+  grunt.loadNpmTasks('grunt-contrib-compress');
 
   grunt.registerTask('remove build folder', () => {
-    if (fs.existsSync(buildDir)) fs.rmdirSync(buildDir, { recursive: true })
-  })
+    if (fs.existsSync(buildDir)) fs.rmdirSync(buildDir, { recursive: true });
+  });
 
   grunt.registerTask('create build folder', () => {
-    fs.mkdirSync(buildDir)
-  })
+    fs.mkdirSync(buildDir);
+  });
 
   grunt.registerTask('copy package.json', () => {
-    fs.copyFileSync('./package.json', path.join(buildDir, 'package.json'))
-  })
+    fs.copyFileSync('./package.json', path.join(buildDir, 'package.json'));
+  });
 
   grunt.registerTask('default', [
     'run:test',
@@ -61,5 +61,5 @@ module.exports = function (grunt) {
     'run:install',
     'compress',
     'remove build folder',
-  ])
-}
+  ]);
+};

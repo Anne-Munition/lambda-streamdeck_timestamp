@@ -9,6 +9,8 @@
   "private": true,
   "scripts": {
     "build": "grunt",
+    "prettier": "prettier --write \"**/*.{js,md,*rc,json}\" --ignore-path .gitignore",
+    "lint": "eslint --ext .js,.ts --ignore-path .gitignore .",
     "test": "jest"
   },
   "dependencies": {
@@ -27,6 +29,6 @@
     "jest": "^26.6.3",
     "mockdate": "^3.0.2",
     "nock": "^13.0.11",
-    "prettier": "^2.2.1"
+    "prettier": "^2.5.1"
   }
 }

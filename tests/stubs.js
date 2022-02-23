@@ -15,7 +15,7 @@ exports.liveStream = {
     },
   ],
   pagination: {},
-}
+};
 
 exports.rerunStream = {
   data: [
@@ -34,7 +34,7 @@ exports.rerunStream = {
     },
   ],
   pagination: {},
-}
+};
 
 exports.recordingVideo = {
   _total: 46,
@@ -61,7 +61,7 @@ exports.recordingVideo = {
       length: 8702,
     },
   ],
-}
+};
 
 exports.recordedVideo = {
   _total: 29,
@@ -89,4 +89,4 @@ exports.recordedVideo = {
       length: 10011,
     },
   ],
-}
+};
