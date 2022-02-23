@@ -36,57 +36,30 @@ exports.rerunStream = {
   pagination: {},
 };
 
-exports.recordingVideo = {
-  _total: 46,
-  videos: [
+exports.video = {
+  data: [
     {
-      title: 'serenity now... serenity now... // @AnneMunition',
-      description: null,
-      description_html: null,
-      broadcast_id: 41926193470,
-      broadcast_type: 'archive',
-      status: 'recording',
-      tag_list: '',
-      views: 24,
-      url: 'https://www.twitch.tv/videos/943013562',
-      language: 'en',
-      created_at: '2021-03-09T17:22:46Z',
+      id: '1306542392',
+      stream_id: '45620019181',
+      user_id: '51533859',
+      user_login: 'annemunition',
+      user_name: 'AnneMunition',
+      title: 'let the scavs breakdance // @AnneMunition',
+      description: '',
+      created_at: '2022-02-22T16:33:43Z',
+      published_at: '2022-02-22T16:33:43Z',
+      url: 'https://www.twitch.tv/videos/1306542392',
+      thumbnail_url:
+        'https://static-cdn.jtvnw.net/cf_vods/d1m7jfoe9zdc1j/dec0f23f9b52249fd3a6_annemunition_45620019181_1645547619//thumb/thumb0-%{width}x%{height}.jpg',
       viewable: 'public',
-      viewable_at: null,
-      published_at: '2021-03-09T17:22:46Z',
-      delete_at: '2021-05-08T17:22:46Z',
-      _id: 'v943013562',
-      recorded_at: '2021-03-09T17:22:46Z',
-      game: 'Escape From Tarkov',
-      length: 8702,
+      view_count: 11631,
+      language: 'en',
+      type: 'archive',
+      duration: '5h40m1s',
+      muted_segments: null,
     },
   ],
-};
-
-exports.recordedVideo = {
-  _total: 29,
-  videos: [
-    {
-      title:
-        "Get'R'Dun Monday and Playing with Viewers / / !activision !discord",
-      description: null,
-      description_html: null,
-      broadcast_id: 41921207998,
-      broadcast_type: 'archive',
-      status: 'recorded',
-      tag_list: '',
-      views: 75,
-      url: 'https://www.twitch.tv/videos/942497037',
-      language: 'en',
-      created_at: '2021-03-09T02:48:20Z',
-      viewable: 'public',
-      viewable_at: null,
-      published_at: '2021-03-09T02:48:20Z',
-      delete_at: '2021-05-08T02:48:20Z',
-      _id: 'v942497037',
-      recorded_at: '2021-03-09T02:48:20Z',
-      game: 'Call of Duty: Warzone',
-      length: 10011,
-    },
-  ],
+  pagination: {
+    cursor: 'eyJiIjpudWxsLCJhIjp7Ik9mZnNldCI6MX19',
+  },
 };

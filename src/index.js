@@ -1,5 +1,8 @@
 const axios = require('axios');
-const moment = require('moment');
+const dayjs = require('dayjs');
+const duration = require('dayjs/plugin/duration');
+
+dayjs.extend(duration);
 
 function helixHeaders() {
   return {
@@ -8,51 +11,39 @@ function helixHeaders() {
   };
 }
 
-function krakenHeaders() {
-  return {
-    'Client-ID': process.env.CLIENT_ID,
-    Authorization: `Oauth ${process.env.ACCESS_TOKEN}`,
-    Accept: 'application/vnd.twitchtv.v5+json',
-  };
-}
-
 async function twitch() {
-  const now = moment();
+  const now = dayjs();
   const streamData = await axios
     .get('https://api.twitch.tv/helix/streams', {
       params: { user_id: process.env.CHANNEL_ID },
       headers: helixHeaders(),
     })
-    .then(({ data }) => data)
+    .then(({ data }) => data.data)
     .catch(() => null);
   if (!streamData) return '**API ERROR** - Unable to get stream data';
-  if (!streamData.data.length) return 'The stream is currently OFFLINE';
-  const stream = streamData.data[0];
+  if (!streamData.length) return 'The stream is currently OFFLINE';
+  const stream = streamData[0];
   if (stream.type !== 'live') return 'The stream is not LIVE';
   const game = stream.game_name;
   const videoData = await axios
-    .get(
-      `https://api.twitch.tv/kraken/channels/${process.env.CHANNEL_ID}/videos`,
-      {
-        params: {
-          broadcast_type: 'archive',
-          limit: 1,
-        },
-        headers: krakenHeaders(),
+    .get('https://api.twitch.tv/helix/videos', {
+      params: {
+        user_id: process.env.CHANNEL_ID,
+        type: 'archive',
+        first: 1,
       },
-    )
-    .then(({ data }) => data)
+      headers: helixHeaders(),
+    })
+    .then(({ data }) => data.data)
     .catch(() => null);
-  const streamDuration = moment.duration(now - moment(stream.started_at));
+  const streamDuration = dayjs.duration(now - dayjs(stream.started_at));
   const streamTimestamp = `${streamDuration.hours()}h${streamDuration.minutes()}m${streamDuration.seconds()}s`;
   if (!videoData)
     return `**${game}** - Unable to get video data - ${streamTimestamp}`;
-  if (!videoData.videos.length)
+  if (!videoData.length)
     return `**${game}** - No videos found - ${streamTimestamp}`;
-  const video = videoData.videos[0];
-  if (video.status !== 'recording')
-    return `**${game}** - No LIVE videos found - ${streamTimestamp}`;
-  const videoDuration = moment.duration(now - moment(video.created_at));
+  const video = videoData[0];
+  const videoDuration = dayjs.duration(now - dayjs(video.created_at));
   const videoTimestamp = `${videoDuration.hours()}h${videoDuration.minutes()}m${videoDuration.seconds()}s`;
   return `**${game}** - <${video.url}?t=${videoTimestamp}>`;
 }

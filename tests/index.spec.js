@@ -6,7 +6,10 @@ const { handler, twitch } = require('../src');
 const nock = require('nock');
 const MockDate = require('mockdate');
 const stubs = require('./stubs');
-const moment = require('moment');
+const dayjs = require('dayjs');
+const duration = require('dayjs/plugin/duration');
+
+dayjs.extend(duration);
 
 describe('lambda-timestamp', () => {
   beforeEach(() => {
@@ -146,7 +149,7 @@ describe('lambda-timestamp', () => {
 
     test('no video data from api', async () => {
       MockDate.set(
-        moment(stubs.liveStream.data[0].started_at).valueOf() + 1000 * 60 * 10,
+        dayjs(stubs.liveStream.data[0].started_at).valueOf() + 1000 * 60 * 10,
       );
       nock('https://api.twitch.tv')
         .get('/helix/streams')
@@ -165,44 +168,43 @@ describe('lambda-timestamp', () => {
 
     test('no videos returned in results', async () => {
       MockDate.set(
-        moment(stubs.liveStream.data[0].started_at).valueOf() + 1000 * 60 * 10,
+        dayjs(stubs.liveStream.data[0].started_at).valueOf() + 1000 * 60 * 10,
       );
       nock('https://api.twitch.tv')
         .get('/helix/streams')
         .query(true)
         .reply(200, stubs.liveStream);
       nock('https://api.twitch.tv')
-        .get('/kraken/channels/channelID/videos')
+        .get('/helix/videos')
         .query(true)
-        .reply(200, { videos: [] });
+        .reply(200, { data: [] });
 
       const actual = await twitch();
       expect(actual).toBe('**Escape From Tarkov** - No videos found - 0h10m0s');
     });
 
-    test('no videos returned with type recording', async () => {
+    /*test('no videos returned with type recording', async () => {
       MockDate.set(
-        moment(stubs.liveStream.data[0].started_at).valueOf() + 1000 * 60 * 10,
+        dayjs(stubs.liveStream.data[0].started_at).valueOf() + 1000 * 60 * 10,
       );
       nock('https://api.twitch.tv')
         .get('/helix/streams')
         .query(true)
         .reply(200, stubs.liveStream);
       nock('https://api.twitch.tv')
-        .get('/kraken/channels/channelID/videos')
+        .get('/helix/videos')
         .query(true)
-        .reply(200, stubs.recordedVideo);
+        .reply(200, stubs.video);
 
       const actual = await twitch();
       expect(actual).toBe(
         '**Escape From Tarkov** - No LIVE videos found - 0h10m0s',
       );
-    });
+    });*/
 
     test('good results with full headers and query checks', async () => {
       MockDate.set(
-        moment(stubs.recordingVideo.videos[0].created_at).valueOf() +
-          1000 * 60 * 15,
+        dayjs(stubs.video.data[0].created_at).valueOf() + 1000 * 60 * 15,
       );
       nock('https://api.twitch.tv', {
         reqheaders: {
@@ -216,20 +218,20 @@ describe('lambda-timestamp', () => {
       nock('https://api.twitch.tv', {
         reqheaders: {
           'Client-ID': 'clientId',
-          Authorization: 'Oauth accessToken',
-          Accept: 'application/vnd.twitchtv.v5+json',
+          Authorization: 'Bearer accessToken',
         },
       })
-        .get('/kraken/channels/channelID/videos')
+        .get('/helix/videos')
         .query({
-          broadcast_type: 'archive',
-          limit: 1,
+          user_id: 'channelID',
+          type: 'archive',
+          first: 1,
         })
-        .reply(200, stubs.recordingVideo);
+        .reply(200, stubs.video);
 
       const actual = await twitch();
       expect(actual).toBe(
-        '**Escape From Tarkov** - <https://www.twitch.tv/videos/943013562?t=0h15m0s>',
+        '**Escape From Tarkov** - <https://www.twitch.tv/videos/1306542392?t=0h15m0s>',
       );
     });
   });
