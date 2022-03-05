@@ -1,0 +1,33 @@
+name: Deploy to Lambda Function
+
+on:
+  push:
+    branches: [ deploy ]
+
+jobs:
+  deploy_zip:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Install Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+
+      - name: Yarn Install
+        run: yarn install --immutable --immutable-cache --check-cache
+
+      - name: Build Zip
+        run: yarn build
+
+      - name: Deploy Zip
+        uses: appleboy/lambda-action@master
+        with:
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: ${{ secrets.AWS_REGION }}
+          function_name: streamdeck_timestamp
+          zip_file: dist/lambda-timestamp.zip
