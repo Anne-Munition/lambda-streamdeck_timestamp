@@ -31,4 +31,3 @@ jobs:
           aws_region: ${{ secrets.AWS_REGION }}
           function_name: streamdeck_timestamp
           zip_file: dist/lambda-timestamp.zip
-          role: ${{ secrets.AWS_ROLE_ARN }}
