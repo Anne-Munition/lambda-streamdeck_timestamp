@@ -51,7 +51,6 @@ async function twitch() {
 let lastRun;
 
 async function handler(event) {
-  await getKeys();
   if (!process.env.DISCORD_WEBHOOK) throw new Error('Missing DISCORD_WEBHOOK');
   if (!process.env.CHANNEL_ID) throw new Error('Missing CHANNEL_ID');
   if (!process.env.TOKEN) throw new Error('Missing TOKEN');
@@ -83,16 +82,23 @@ async function handler(event) {
   }
   lastRun = Date.now();
 
-  const content = await twitch();
-  if (!content) return;
-  await axios.post(process.env.DISCORD_WEBHOOK, {
-    content,
-  });
-
-  return {
-    statusCode: 200,
-    body: content,
-  };
+  try {
+    await getKeys();
+    const content = await twitch();
+    if (!content) return;
+    await axios.post(process.env.DISCORD_WEBHOOK, {
+      content,
+    });
+    return {
+      statusCode: 200,
+      body: content,
+    };
+  } catch (e) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ message: 'Internal Server Error' }),
+    };
+  }
 }
 
 async function getKeys() {
